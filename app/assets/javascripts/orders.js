@@ -38,4 +38,10 @@ function update() {
     const price = document.querySelector("#totalprice");
     console.log(price.innerHTML);
     updateOrder(btn.id, price.innerHTML);
+  
+    swal("Enter your phone number:", {
+        content: "input",
+    }).then((value) => {
+    location.href = `/products`;
+    });
 }

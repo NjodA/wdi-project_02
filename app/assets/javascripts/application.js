@@ -22,14 +22,28 @@ function responseToJson(response) {
     return response.json();
 }
 function addingredints() {
-    const form = document.querySelector("#recipe_form");
+    const table = document.querySelector("#ing_table");
+    var tr = table.insertRow(-1);
+    var cell1 = tr.insertCell(-1);
+    var cell2 = tr.insertCell(-1);
+
+
     var name = document.createElement("input");
     name.type = "text";
     var quan = document.createElement("input");
-    quan.type = "text";
+    quan.type = "number";
+    quan.value = 1;
+    quan.setAttribute("class", "quant");
+
     // input.className = "css-class-name"; // set the CSS class
-    form.appendChild(name);
-    form.appendChild(quan);
+    // var br = document.createElement("br");
+    // table.appendChild(tr);
+    // tr.appendChild(name);
+    // tr.appendChild(quan);
+    // form.appendChild(br);
+    cell1.appendChild(name);
+    cell2.appendChild(quan);
+
     ingredints.push({ name: name, quan: quan })
 }
 
@@ -47,7 +61,7 @@ function addNewRecipe(title, steps, image, a) {
             for (i = 0; i < ingredints.length; i++) {
                 addNewIngredient(ingredints[i].name, ingredints[i].quan, data.id);
             }
-            console.log(data);
+            location.href = `/recipes/${data.id}`;
         });
 }
 function addNewIngredient(name, quan, id) {
@@ -72,8 +86,8 @@ window.onload = function () {
     const input = document.querySelector("#title");
     const input2 = document.querySelector("#steps");
     const input3 = document.querySelector("#image");
-    const name0 = document.querySelector("#name");
-    const quan0 = document.querySelector("#quan");
+    const name0 = document.querySelector("#name1");
+    const quan0 = document.querySelector("#quan1");
     const name1 = document.querySelector("#name2");
     const quan1 = document.querySelector("#quan2");
     const name2 = document.querySelector("#name3");
@@ -120,14 +134,16 @@ window.onload = function () {
             addNewRecipe(input.value, input2.value, input3.value, a);
         });
     }
+   
     const form1 = document.querySelector("#gluten");
 
     const input1 = document.querySelector("#search");
+    if (form1) {
     form1.addEventListener("submit", function (ev) {
-        console.log(28)
         ev.preventDefault();
         getGip(input1.value);
     });
+}
 
 };
 
@@ -135,37 +151,55 @@ window.onload = function () {
 let q = 1;
 let arr = [];
 let totalprice;
-function fun() {
-    pp = document.querySelector("#productTry");
+let test;
+
+function fun(event) {
+    // debugger;
+    // pp = document.querySelector("#productTry");
+    pp = event.target.parentNode.parentNode.querySelector("#productTry");
     console.log(pp);
-    const price = document.querySelector("#price");
-    p = price.innerHTML;
+    let p=event.target.parentNode.parentNode.querySelector("#price");
+    // let price = event.target.parentNode.parentNode.querySelector("#price");
+    // p = price.innerHTML;
+    // console.log(p);
 
+    const quant = event.target.parentNode.parentNode.querySelector("#quant");
+    const price1 = event.target.parentNode.parentNode.querySelector("#totalPrice");
 
-    const quant = document.querySelector("#quant");
-    const price1 = document.querySelector("#totalPrice");
-    q = ++q;
-    quant.innerHTML = q;
+    
+    quant.innerHTML = parseFloat(quant.innerHTML) + 1;
 
-    price1.innerHTML = p * q;
-    totalprice = p * q;
+    price1.innerHTML = parseFloat(quant.innerHTML) * parseFloat(p.innerHTML);
+    // totalprice = p * q;
+ 
 
 }
 let total = 0;
-function order() {
-    const order1 = document.querySelector(".sameorder");
-    console.log(order1);
-    addNewItem(q, totalprice, pp.innerHTML, order1.id);
+function order(event) {
+    console.log(22)
+    const totalPrice = parseFloat(event.target.parentNode.parentNode.querySelector("#totalPrice").innerHTML);
+    const quantity = parseFloat(event.target.parentNode.parentNode.querySelector("#quant").innerHTML);
+    const productID = event.target.parentNode.parentNode.querySelector("#productTry").innerHTML;
+    const orderID = event.target.parentNode.parentNode.querySelector(".sameorder").id
+    addNewItem(quantity, totalPrice, productID, orderID);
+    // pp = event.target.parentNode.parentNode.querySelector("#productTry");
+    // const order1 = document.querySelector(".sameorder");
+    // debugger;
+    // console.log(order1);
+    // addNewItem(q, totalprice, pp.innerHTML, order1.id);
 }
-function cart() {
-    // addNewItem(q, totalprice, pp.innerHTML);
+function cart(event) {
+    const totalPrice = parseFloat(event.target.parentNode.parentNode.querySelector("#totalPrice").innerHTML);
+    const quantity = parseFloat(event.target.parentNode.parentNode.querySelector("#quant").innerHTML);
+    const productID = event.target.parentNode.parentNode.querySelector("#productTry").innerHTML;
+    // const orderID = event.target.parentNode.parentNode.querySelector(".sameorder").id
     arr.push({
-        quant: q, price: totalprice, p_id: pp.innerHTML
+        quant: quantity, price: totalPrice, p_id: productID
     });
     for (let i = 0; i > arr.length; i++) {
         total += arr.price;
     }
-    addNewOrder(totalprice);
+    addNewOrder(totalPrice, quantity, productID);
     location.reload();
 }
 
@@ -186,16 +220,17 @@ function addNewItem(quantity, price, product_id, order_id) {
         .then(data => {
             // addNewIngredient(item, item2, data.id)
             console.log(data);
+            location.href = `/products/`;
         });
 }
 
-function addNewOrder(price) {
+function addNewOrder(price, quantity, productID) {
     // someSessionVariable = `@Session[${0}]`;
     let params = { price: price };
     fetch("/orders", {
         method: "POST",
         headers: {
-            "content-Type": "application/json",
+            "Content-Type": "application/json",
             Accept: "application/json"
         },
         body: JSON.stringify(params)
@@ -203,7 +238,8 @@ function addNewOrder(price) {
         .then(data => {
             console.log(data);
             orderId = data.id
-            addNewItem(q, totalprice, pp.innerHTML, orderId);
+            addNewItem(quantity, price, productID, orderId  );
+            // addNewItem(q, totalprice, pp.innerHTML, orderId);
         });
 }
 // const apiKey = "HbAQEbnB7ao2wMDmoRPOZQsfVSDkAKNs";
